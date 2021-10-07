@@ -1,0 +1,360 @@
+#Scope Verification
+
+Use to verify scope
+
+https://bgp.he.net/net
+https://dnschecker.org/all-tools.php
+
+#Google Dorking
+
+Google Hacking DataBase (GHDB)
+Search on Google, Bing, DuckDuckGo, Baidu, Yandex, etc
+
+Use the “-” to remove search terms (ie: -Florida)
+use “site:DOMAIN.COM” to search a specific location for the search terms
+use “AND” to search multiple terms together
+use “ ” to search phrases in order (ie: “Happy Dog”)
+use wildcard (*) to search for ANY match in that phrase (ie: *.google.com)
+use “filetype:” to look for specific files (pdf,docx,xslx,csv,etc)
+use “intext:*” to look for any webpage with the search term in the page
+use “inurl:*” to search for the term in the sites url
+use “intitle:*" to search for phrase in webpage titles
+
+
+#Finding Emails and Users
+
+https://hunter.io
+
+signup for 50 free searches per year
+simply search the domain you are looking to identify
+Pattern identification can help help in discovering email format (ie: f.last@domain.com)
+filter by departments to help narrow your search
+
+https://phonebook.cz
+
+search domain you are looking to identify
+quick and easy to copy/paste a wordlist for username enumeration
+use default/weak passwords and spray at all usernames
+
+clearbit (chrome extention)
+from gmail, simply searchthe domain you are looking for.
+filter by role/seniority
+
+https://tools.verifyemailaddress.io
+https://email-checker.net/validate
+verify emails collected
+
+forgot password functions can help tie in additional information (other email / phone number)
+
+USE LINKEDIN! (search company employees)
+	look for legitimate scrappers to make larger orgs easy
+Add to breached accounts tab
+
+git clone https://github.com/killswitch-GUI/SimplyEmail.git
+./SimplyEmail.py -all -e TARGET-DOMAIN
+
+use to find websites with that username
+https://namechk.com 
+https://whatsmyname.app
+https://namecheckup.com
+
+#Enumerating Valid Accounts
+
+login message may reveal incorrect EMAIL
+Reset password can inform you thatan email is valid
+Notate login portals identified in relevant tab
+
+#Password OSINT
+
+https://github.com/hmaverickadams/breach-parse
+
+breach-parse @gmail.com gmail.txt
+
+Identify patterns (multiple breaches, reuses, weak passwords)
+		Add to breached accounts sheet
+		
+https://dehashed.com/  (Paid account)
+https://weleakinfo.to  (Paid account)
+https://leakcheck.io  (Paid account)
+https://haveibeenpwned/com
+https://scylla.sh
+
+Search based on criteria (name, domain, email, address, etc)
+	Utilize different source if password sprays don't end up working
+	
+#People OSINT
+
+https://whitepages.com
+https://truepeoplesearch.com
+https://fastpeoplesearch
+https://fastbackgroundcheck.com
+https://webmii.com
+https://peekyou.com
+https://411.com
+https://spokeo.com
+https://thatsthem.com
+
+Voter Records
+
+https://voterrecords.com
+
+Phone Numbers
+
+Google it!
+Try different combinations of the number (xxx)xxx-xxxx / (xxx)xxxxxxx / xxx-xxx-xxxx / xxxxxxxxxx / emojis / spell out the numbers
+
+https://truecaller.com (don't download on devices you like)
+https://calleridtest.com (5 per day)
+https://infobel.com
+
+Resumes
+
+google - “name” resume 
+filter by filetype:pdf/docx
+filter by site:google, dropbox, scribd, linkedin
+
+#Social Media OSINT
+
+Twitter
+
+twitter.com/search-advanced
+
+Search for people/topics/keywords
+Top is trending on Twitter
+Latest is most recent mention
+People is users associated with or in bio
+Photos
+Videos
+
+use “ ” to search specific phrases
+use from:* to filter by specific users
+use to:* to see who is tweeting at the target
+use the @* to see anyone who tagged the target
+use since:YYYY-MM-DD to view tweets since date
+use until:YYYY-MM-DD to limit previous operator
+use geocode: COORDINATES RANGEKM to view tweets within a speficied location
+look through likes/media/replies/tweets
+
+https://socialbearing.com
+https://www.twitonomy.com/
+https://mentionmapp.com/
+http://spoonbill.io/
+https://tinfoleak.com/
+http://sleepingtime.org/
+https://tweetdeck.com
+
+Facebook
+
+search name
+filter by location/education
+filter by posts/people/photos/groups/etc
+
+use "photos of NAME" to see who contacted that person
+
+view page source and find “userID” for Entity ID to search
+
+Pull data from Into / Pictures / Friends / Videos / Check-ins / Likes
+
+https://sowdust.github.io/fb-search/
+https://intelx.io/tools?tab=facebook
+
+Instagram
+
+check account / photos / tags / followers / following
+
+https://wopita.com
+https://codeofaninja.com
+https://instadp.com
+https://imginn.com
+
+Snapchat
+
+Search usernames / slow type in search field
+search user locations using https://map.snapchat.com
+
+Reddit
+
+Search for the username on Reddit
+use “ ” to search specific phrases 
+use google to search phrases at site:reddit.com
+
+Linkedin
+
+look at unique url username (ie: in/xxxx-xxxxx)
+look for contact info
+Look at the company they work at
+Look at coworkers
+
+#Other relevant info
+
+Job posting explains environment, systems, tools, applications
+Google search for password/other policies
+
+#Website OSINT
+
+filter by "site:"
+search for site:* USER
+look for pictures
+begin removing keywords you have already recon'd
+
+https://builtwith.com
+Look at the different tabs (metadata/Detailed tech profile) and look for older/weak infrastructure
+
+https://centralops.net/co/
+shows IP, WHOIS (contact/location/phone), Name Servers, MX records, service scans (nmap)
+
+https://dnslytics.com
+use tools to find other domains (self-hosted), 
+
+https://spyonweb.com
+Whois, Alexa Ranking, and search for additional domains using UA
+
+https://virustotal.com
+Identify UA code from Google
+
+https://reddit.com/domain/DOMAIN.com
+See anyone who has been discussing the company on Reddit
+
+https://visualping.io
+monitor website changes
+
+https://backlinkwatch.com
+search for links to compnay on other sites
+
+https://viewdns.info
+dozens of options that can provide information about IP/Domains/etc
+
+#DNS Enumeration
+
+https://whois.domaintools.com/
+https://pentest-tools.com/information-gathering/find-subdomains-of-domain
+https://dnsdumpster.com/
+dnsrecon -d TARGET -D /usr/share/wordlists/dnsmap.txt
+
+#DNS Zone Transfer
+
+dig axfr WEBSITE.com @ns1.WEBSITE.com
+
+
+#Sub-Domain Enumeration
+
+site:*.Domain.com -www
+use inurl: to look for admin/login/dev/sso/vpn/
+sip/autodiscover/profile/uat/staging may be interesting as well. 
+
+https://pentest-tools.com/information-gathering/find-subdomains-of-domain#
+https://spyse.com/
+https://crt.sh/ (%.DOMAIN.com for wildcard)
+https://github.com/appsecco/the-art-of-subdomain-enumeration/blob/master/san_subdomain_enum.py
+https://shodan.io
+https://archive.org
+
+#Hunting Business Info
+
+Use Linkedin for quick and easy OSINT 
+Look at the about for locations/ phone numbers/ employees/ website / open jobs (technology)/ images and videos
+Images are critical! look for badges/ locations/ computer screens/ stickynotes/ 
+use google to reverse search pictures, find titles/profiles
+Look for other staff members (search linkedin.com/in/ “at COMPANY”)
+
+https://opencorporate.com
+Search company info (address, officers, time in business, paperwork)
+
+State business registries
+
+https://aihit.com
+
+Look for Companies open positions on (indeed/Dice/career pages/others)
+
+#Wireless OSINT
+
+https://wigle.net
+
+#Using Tools
+
+Image and Location Data
+
+Look for other tools (instagram OSINT, etc)
+
+exiftool FILENAME (gives basic information)
+
+Hunting Breached data
+
+theHarvester -d DOMAIN -l LIMIT -b source1.source2,all (look into setting up API keys)
+./breach-parse.sh @DOMAIN.COM FILENAME
+h8mail -t EMAIL (or file)
+h8mail -t EMAIL or FILE  -bc "/opt/breach-parse/BreachCompilation/" -sk
+
+Usernames and Account OSINT
+
+python3 /opt/OSINT-tools/sherlock/sherlock/sherlock.py USERNAME
+
+Phone Number OSINT
+
+phoneinfoga scan -n NUMBER
+phoneinfoga serve -p 8080 (GUI Version)
+
+Social Media OSINT
+
+TWITTER
+
+cd to /opt/OSINT-tools/src/twint/twint
+
+twint -u USERNAME -s SUBJECT
+twint -u USERNAME -o FILE.txt (or .csv with --csv)
+twint -u USERNAME --timeline
+twint -u USERNAME --year
+twint -u USERNAME --since YYY-MM-DD
+twint -s SUBJECT 
+
+INSTAGRAM
+
+cd to /opt/OSINT-tools/InstagramOSINT
+python3 main.py --username USERNAME
+
+WEBSITE OSINT
+
+Use Wappalyzer to get some high level details about how the website was built (use builtwith as well)
+
+whatweb -v DOMAIN
+whois DOMAIN
+
+subfinder -d DOMAIN > DOMAIN.txt
+assetfinder DOMAIN | grep DOMAIN >> DOMAIN.txt
+amass enum -d DOMAIN
+cat TARGET.txt | sort -u | httprobe -s -p https:443
+
+OSINT Frameworks
+ 
+recon-ng
+ marketplace search
+ look for recon/* 
+
+marketplace install hackertarget (finds Hostnames)
+modules load hackertarget
+options set SOURCE domain
+show hosts
+
+marketplace install profiler
+module load profiler
+options set SOURCE username
+show profiles
+
+search for more and use them to gain more info
+
+Other Tools
+https://hunch.ly
+ONLY Runs in Chrome
+Start New Case
+
+use selectors as a keyword search to find 
+use tags to flag specific webpages
+
+#Writing an OSINT report
+
+Summary
+Key Findings
+Subject Info (Photo / Info / Accounts and Emails )
+Steps taken to find info (keep it short)
+Technical Evidence (Instructions and screenshots)
+How does the info tie to the subject
