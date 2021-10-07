@@ -1,0 +1,176 @@
+# Report Writing
+
+• Confidentiality Statement
+• Point in Time statement 
+• Client Point of Contact
+• Attacker Point of Contact
+• Assessment Overview
+• Assessment Components
+• Findings Severity Rating
+• Risk Factors (Likelihood and Impact)
+• Scope
+	   ◇ Exlusions
+	   ◇ Allowances
+• Executive Summary
+	   ◇ Time Frame
+	   ◇ Summary of Test
+	   ◇ Discovery (ONLY CRITICAL)
+	   ◇ Solution
+• Strengths and Weaknesses
+• Vulnerability Scan Info and Report
+• Technical Findings
+	   ◇ Most Critical to Least Critical
+	   ◇ Description and Facts
+	   ◇ Risk
+	   ◇ Tools Used
+	   ◇ References
+	   ◇ Evidence (Screenshots)
+• Remediation
+• (Repeat for each finding)
+• Informational findings
+	   ◇ Current users with data
+• Additional scans and reports
+	   ◇ Neesus
+	   ◇ Excel Sheet 
+  	   ◇ Additional document
+
+# Common Documents
+
+Sales Documents
+
+Mutual Non-disclosure agrrements (NDA)
+	Not allowed to talk about the findings I have discovered, and you can't discuss our methodology
+
+Master Service Agreement (MSA)
+	Contractual document outlines objectives and responsibilites for each party.
+
+Statement of Work (SOW)
+	Outlines activities, timelines, deliverables, payments
+	
+Others: 
+	Sample Reports, Recommendation letters, etc.
+
+PRE-Engagement
+
+Rules of Engagement
+	Defines exact IP range, excluded machines/IP's. unauthorized testing (DoS, Social Engineering), DO NOT START UNTIL THIS IS SIGNED
+
+Post Engagement
+
+Findings Report
+	Describes what was found at a high-level, as well as technical details of how the test was conducted
+
+
+# Common Findings
+
+Insufficient Authentication Controls
+
+MFA not implemented, logins can be bypassed with password sprays and scans
+Use VPN or ensure MFA is enabled everywhere
+Usually High-Critical
+NIST 800-53 IA-2(11)
+
+Weak Password Policy
+
+Logging in with “winter2021” usually means they have a bad password
+Policy Password is public and viewable
+Try to sign up
+use denylists that block dictionary words/rockyou/other breached lists
+NIST 800-63B 
+
+Insufficient Patching
+
+Versions with open, known vulnerabilities and CVE's.
+Legacy/Out of Date systems
+Upgrade to latest patch/version
+NIST 800-53 MA-6
+NIST 800-53 SI-2
+
+Default Credentials
+
+Very fast compromise
+VERY common (ALWAYS CHECK)
+Change the manufacturer password immediately on opening
+NIST 800-53 IA-5
+
+Insufficient Encryption
+
+MOST common
+Not using HTTPS
+Weak Ciphers (low for attack)
+	SSL/TLS1 / Sweet32 / RC4 / Self Signed
+Disable weak ciphers
+NIST 800-53 IA-2(11)
+
+Information Disclosure
+
+System/Error/User information
+mDNS disclose hostname/architecture
+Server response headers reveal infrastructure
+OWASP - Improper Error Handling
+
+Username Enumeration
+
+Login Portals may provide username enumeration
+Forgot Password feature reveals valid email
+Synchronize error messages ("check your email")
+
+
+Default Web Pages
+
+Unconfigured / Test pages left open
+Shows weak security posture for the organization
+Try to directory bust and find other misconfigurations
+Remove unused web app or add terms or service/other info
+
+IKE Aggressive Mode
+
+Aggressive mode allows for capture of VPN Pre Shared Key and gain access ot network
+Low likelihood but high impact
+NIST 800-53 CM-7
+
+Unexpected Perimeter Services
+
+RDP. Telnet open from the internet
+Note any services outward facing
+Easily crackable
+
+Insufficient Traffic Blocking
+
+Is the site blocking traffic from random locations
+https://shotsherpa.com
+Limit attack surface and block odd traffic
+NIST 800-53 CM-7
+
+Undetected Malicious Activity
+
+Did not detect scans, trojans,malware, etc used during testing
+Review SIEM strategy and make inprovements
+Low-informational
+List attacks missed and detected
+
+Historical Account Compromise
+
+Users and Passwords found in Breaches
+HIGH-Critical 
+Review who is current employee, add passwords to deny list, users should not register for accounts with work email, avoid password reuse
+NIST 800-53 MA-6
+NIST 800-53 SI-2
+
+# Client Debriefing
+
+Review report in PDF or Powerpoint
+Talk about findingd at 30,000ft
+Common Issues
+Tell story
+Our job is to find bugs before the bad guys do
+Occasionally may get pushback. Handle the adversity
+
+# Attestation Letter
+
+A Proof of services rendered (Copy / Paste of Executive Summary) 
+Overall summary and conclusion
+Client Retesting
+	Going back to test remediations made from findings
+	If it was fixed, Good job, but do not remove. Mark it as remediated
+	Project is not done until you retest
