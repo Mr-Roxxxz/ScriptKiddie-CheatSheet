@@ -1,0 +1,97 @@
+#Objectives of an External Pentest
+
+Trying to test the security from an attackers perspective. 
+Can a hacker access the system? 
+What weaknesses are present in the system?
+Provide potential remediation steps
+PROTECT THE CLIENT
+
+#External Checklist
+
+Ensure ROE is signed by Client
+Add IP's to Scope TAB
+Verify scope with customer
+Send Kick-off email
+Conduct Vuln scan with Nessus
+Identify leaked/breached credentials
+Identify employees and email format
+Identify websites and search for relevant data (job postings, system info, policy)
+Enumerate any accounts on portals, password resets, etc
+Run a web app scan (if applicable)
+Manually test and exploit target
+Validate vulnerabilities found in scanning
+Conduct password spray & Bruteforcing on login portals
+Escalate from internal to external
+Validate previous test results (if applicable)
+Cleanup
+
+#Rules of Engagement
+
+Signed document after MSA, Quote, etc are completed
+
+Defines roles, responsibilities, and bounds of the test beging performed
+Team members authorized to engage
+Customer Point of Contact
+Company Point of Contact
+Rules:
+Test Dates
+Discolsure
+Status Updates
+Scope (IP's)
+Potential disruptive testing
+Bounds (exclusions)
+Stop Point
+Maintaining Access
+Announcement
+Project Closure
+Post-Mortem
+Out-Of-Scope
+Disclaimer
+Acceptance (MUST BE SIGNED BY REPRESENTATIVE)
+
+#Verifying Scope
+
+Screw this up and YOU GO TO JAIL. 
+Ensure that the IP range/ Websites given to you belong to the client
+
+#Use to verify scope
+
+https://bgp.he.net/net
+https://dnschecker.org/all-tools.php
+
+#Communication
+
+Low-Med findings may not need alot of communications
+High-Critical should have immediate contact (RCE, Vulns)
+
+#Kick-Off email
+Notify of start, IP Range agreed upon, Attacker IP
+Automate!! (email, Nessus scan can be automated to begin ASAP)
+
+
+#Attack Strategy
+
+RCE is unlikely (if it was available, an attacker would have already gotten to it)
+Password strength. weak password policy is far more likely. No MFA
+OSINT can definietly help you figure out what you are looking for
+WebApp may not be interesting, but you CAN try to attack it.
+
+#Vulerability Scanning
+
+Begin with an Advanced Scan
+set targets/range
+Schedule it to begin immediately once engagement begins
+Set ALL ports to scan (1-65535)
+Ensure Web App are scanned (check other Assessments as well)
+May take a while depending on size of scope
+
+#Reviewing and Extracting Information
+
+Alot of data will be low priority, don't waste time writing a 1000 page document, provide reports on vulnerabilities found using:
+
+#Export Nessus File
+Export PDF report (Executive, Custom with Everything)
+Export HTML report
+
+Melcara Nessus Parser (melcara.com)
+Run and export it to XLSX
