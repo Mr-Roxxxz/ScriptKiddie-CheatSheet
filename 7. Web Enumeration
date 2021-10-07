@@ -1,0 +1,78 @@
+# Sub Domain Enumeration
+
+assetfinder [--subs-only] <domain>
+
+cd /opt/AssetFinder/
+./subdom.sh <domain>
+OR
+./sumrecon.sh <domain
+
+amass enum -d <domain>
+
+<targetfile> | httprobe -s  | sed ‘s/https\?:\/\///’ | tr -d ‘:PORT’
+
+
+# Web Enumeration (80/443)
+
+dirb http://$IPADDRESS/
+
+nikto –h $IPADDRESS
+
+ffuf -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt:FUZZ -u http://IPADDRESS/FUZZ 
+
+# Version detection + NSE scripts
+nmap -Pn -sV -p $port "--script=banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" -oN tcp_port_protocol_nmap.txt $ip
+Nikto
+
+nikto -h $url 2>&1 | tee "tcp_port_protocol_nikto.txt"
+Directory brute force
+
+gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"  
+
+python3 /opt/dirsearch/dirsearch.py -u $url -t 16 -e txt,html,php,asp,aspx,jsp -f -x 403 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch.txt"
+
+Dirbuster (GUI): only perform extension brute force - disable 'Brute Force Dirs'
+
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/common.txt --hc 404 -t 16 $url/FUZZ 2>&1 | tee "tcp_port_http_wfuzz.txt"
+
+# Directory brute force recursively with max depth = 2
+python3 /opt/dirsearch/dirsearch.py -u $url/apps/ -t 16 -e txt,html,php -f -x 403 -r -R 2 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch_apps.txt"
+Whatweb
+
+whatweb --color=never --no-errors -a 3 -v $url 2>&1 | tee "tcp_port_protocol_whatweb.txt"
+Wordpress
+
+# Enumerate vulnerable plugins and themes, timthumbs, wp-config.php backups, database exports, usernames and media IDs
+wpscan --url $url --no-update --disable-tls-checks -e vp,vt,tt,cb,dbe,u,m --plugins-detection aggressive --plugins-version-detection aggressive -f cli-no-color 2>&1 | tee tcp_port_protocol_wpscan.txt
+
+# Enumerate all plugins
+wpscan --url $url --disable-tls-checks --no-update -e ap --plugins-detection aggressive -f cli-no-color 2>&1 | tee tcp_port_protocol_wpscan_plugins.txt
+Robots.txt
+
+/robots.txt
+Only get HTTP headers
+
+curl -I $url
+Cewl
+
+cewl $url/index.php -m 3 --with-numbers -w cewl.txt
+Drupal
+
+python3 drupwn --version 7.28 --mode enum --target $url
+
+droopescan scan drupal -u $url
+Shellshock
+
+# Check if bash vulnerable to CVE-2014-6271 (bash vulnerable if ‘vulnerable’ in output)
+env x='() { :;}; echo vulnerable' bash -c "echo this is a test" 
+
+# Brute force CGI files
+gobuster dir -u $url/cgi-bin/ -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "cgi,sh,pl,py" -s "200,204,301,302,307,403,500" -t 16 -o "tcp_port_protocol_gobuster_shellshock.txt"
+
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/CGIs.txt --hc 404 -t 16 $url/cgi-bin/FUZZ 2>&1 | tee "tcp_port_protocol_wfuzz.txt"
+
+Webmin uses cgi files - versions up to 1.700 vulnerable to shellshock (http://www.webmin.com/security.html)
+
+# Automate Screenshots
+
+gowitness scan IPADDRESS/RANGE 
